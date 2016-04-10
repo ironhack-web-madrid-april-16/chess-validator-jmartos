@@ -3,6 +3,7 @@ require "pry"
 class Piece
     attr_accessor :x1, :y1, :x2, :y2
     @@moves_array = []
+    @@board_array = []
 
     def initialize (name)
         @name = name
@@ -37,6 +38,27 @@ class Piece
             end
         # print @@moves_array
     end
+
+    def load_board_file
+        puts "Select file for board:\nPress 's' for simple_board.txt or 'c' for complex_board.txt"
+        answer = gets.chomp
+        while answer != "s" && answer != "c" do
+            puts "Non valid option! Tray again"
+            puts "Select file for movements:\nPress 's' for simple_moves.txt or 'c' for complex_moves.txt"
+            answer = gets.chomp
+        end
+            
+        if answer == "s" 
+            file = "simple_board.txt" 
+        elsif answer == "c"
+            file = "complex_board.txt"
+        end
+
+        file_array = (File.foreach("#{file}").map { |line| line.split })
+          file_array.each do |item|
+           @@board_array.push(item)
+        end
+    end
    
     def move_piece
         puts "+++++#{@name}+++++"
@@ -52,24 +74,13 @@ class Piece
     end
     
     def check_pos
-        board = [
-        [:bR, :bN, :bB, :bQ, :bK, :bB, :bN, :bR],
-        [:bP, :bP, :bP, :bP, :bP, :bP, :bP, :bP],
-        [:nil, :nil, :nil, :nil, :nil, :nil, :nil, :nil],
-        [:nil, :nil, :nil, :nil, :nil, :nil, :nil, :nil],
-        [:nil, :nil, :nil, :nil, :nil, :nil, :nil, :nil],
-        [:nil, :nil, :nil, :nil, :nil, :nil, :nil, :nil],
-        [:wP, :wP, :wP, :wP, :wP, :wP, :wP, :wP],
-        [:wR, :wN, :wB, :wQ, :wK, :wB, :wN, :wR]
-        ]
-        
         @@moves_array.each do |item|
             item
             @x2 = item[2]
             @y2 = item[3].to_i
             hor = @x2.ord-97
             ver = (@y2-8)*-1
-            if board[hor][ver] == :nil
+            if @@board_array[hor][ver] == "--"
                 puts "In coord #{@x2}#{@y2} you will find an EMPTY SPACE"
                 else
                 puts "In coord #{@x2}#{@y2} you will have a COLISSION!!!"
@@ -164,8 +175,9 @@ class Pawn_b < Piece
     end
 end
 
-moves1 = Piece.new ""
-moves1.load_moves_file
+game1 = Piece.new ""
+game1.load_moves_file
+game1.load_board_file
 
 rook1 = Rook.new "ROOK"
 rook1.move_piece
