@@ -1,26 +1,54 @@
+
+require "pry"
 class Piece
     attr_accessor :x1, :y1, :x2, :y2
-    @@moves_array = [
-    ["a", 2, "a", 3],
-    ["a", 2, "a", 4],
-    ["a", 2, "a", 5],
-    ["a", 7, "a", 6],
-    ["a", 7, "a", 5],
-    ["a", 7, "a", 4],
-    ["a", 7, "b", 6],
-    ["b", 8, "a", 6],
-    ["b", 8, "c", 6],
-    ["b", 8, "d", 7],
-    ["e", 2, "e", 3],
-    ["e", 3, "e", 2]
-    ]
-    
+    @@moves_array = []
+
     def initialize (name)
         @name = name
         @x1 = x1
         @y1 = y1
         @x2 = x2
         @y2 = y2
+    end
+
+    def load_moves_file
+        puts "Select file for movements:\nPress 's' for simple_moves.txt or 'c' for complex_moves.txt"
+        answer = gets.chomp
+        while answer != "s" && answer != "c" do
+            puts "Non valid option! Tray again"
+            puts "Select file for movements:\nPress 's' for simple_moves.txt or 'c' for complex_moves.txt"
+            answer = gets.chomp
+        end
+            
+        if answer == "s" 
+            file = "simple_moves.txt" 
+        elsif answer == "c"
+            file = "complex_moves.txt"
+        end
+
+        file_array = (File.foreach("#{file}").map { |line| line.split(//) })
+          file_array.each do |item|
+           @@moves_array.push(item)
+            end
+           @@moves_array.each do |item|
+            item.delete_at(2)
+            item.delete_at(4)
+            end
+        # print @@moves_array
+    end
+   
+    def move_piece
+        puts "+++++#{@name}+++++"
+        @@moves_array.each do |item|
+            item
+            @x1 = item[0]
+            @y1 = item[1].to_i
+            @x2 = item[2]
+            @y2 = item[3].to_i
+            move
+        end
+        puts "----------------------"
     end
     
     def check_pos
@@ -38,7 +66,7 @@ class Piece
         @@moves_array.each do |item|
             item
             @x2 = item[2]
-            @y2 = item[3]
+            @y2 = item[3].to_i
             hor = @x2.ord-97
             ver = (@y2-8)*-1
             if board[hor][ver] == :nil
@@ -49,18 +77,6 @@ class Piece
         end
     end
     
-    def move_piece
-        puts "+++++#{@name}+++++"
-        @@moves_array.each do |item|
-            item
-            @x1 = item[0]
-            @y1 = item[1]
-            @x2 = item[2]
-            @y2 = item[3]
-            move
-        end
-        puts "----------------------"
-    end
 end
 
 class Rook < Piece
@@ -117,7 +133,10 @@ end
 
 class Knight < Piece
     def move
-        if (@x1.ord == @x2.ord-1 && @y1 == @y2)
+        if  (@x1.ord == @x2.ord+1 && @y1 == @y2+2) ||
+            (@x1.ord == @x2.ord+1 && @y1 == @y2-2) ||
+            (@x1.ord == @x2.ord-1 && @y1 == @y2+2) ||
+            (@x1.ord == @x2.ord-1 && @y1 == @y2-2)
             puts "Moving from #{@x1}#{@y1} to #{@x2}#{@y2} is LEGAL"
             else
             puts "Moving from #{@x1}#{@y1} to #{@x2}#{@y2} is ILEGAL!!!"
@@ -127,15 +146,7 @@ end
 
 class Pawn_w < Piece
     def move
-        if (@x1.ord == @x2.ord+2 && @y1 == @y2+1) ||
-            (@x1.ord == @x2.ord+2 && @y1 == @y2-1) ||
-            (@x1.ord == @x2.ord-2 && @y1 == @y2+1) ||
-            (@x1.ord == @x2.ord-2 && @y1 == @y2-1) ||
-            
-            (@x1.ord == @x2.ord+1 && @y1 == @y2+2) ||
-            (@x1.ord == @x2.ord+1 && @y1 == @y2-2) ||
-            (@x1.ord == @x2.ord-1 && @y1 == @y2+2) ||
-            (@x1.ord == @x2.ord-1 && @y1 == @y2-2)
+        if (@x1.ord == @x2.ord+1 && @y1 == @y2)
             puts "Moving from #{@x1}#{@y1} to #{@x2}#{@y2} is LEGAL"
             else
             puts "Moving from #{@x1}#{@y1} to #{@x2}#{@y2} is ILEGAL!!!"
@@ -152,6 +163,9 @@ class Pawn_b < Piece
         end
     end
 end
+
+moves1 = Piece.new ""
+moves1.load_moves_file
 
 rook1 = Rook.new "ROOK"
 rook1.move_piece
